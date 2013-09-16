@@ -21,6 +21,17 @@ apache::vhost { "lab-site":
   docroot => "/vagrant",
 }
 
+package { "php5-xdebug":
+  ensure  => installed,
+  require => Class["apache::mod::php"],
+}
+
+file { 'php-config':
+  path    => '/etc/php5/apache2/php.ini',
+  source  => '/vagrant/php.ini',
+  require => Class["apache::mod::php"],
+}
+
 # Module puppetlabs/mysql
 include "mysql"
 include "mysql::php"
