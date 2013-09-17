@@ -10,8 +10,8 @@ class CurrentTime {
                           "December");
 
   public function html() {
-    return $this->days[date("w")] . "dag, den " . date("j") . " " .
+    return "<p>" .$this->days[date("w")] . "dag, den " . date("j") . " " .
            $this->months[date("n")] . " år " . date("Y") . ". Klockan är [" .
-           date("G:i:s") . "].";
+           date("G:i:s") . "].</p>";
   }
 }

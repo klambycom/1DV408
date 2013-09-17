@@ -10,10 +10,33 @@
 <?php
 require_once("view/user.php");
 require_once("view/currenttime.php");
+require_once("model/user.php");
 
 $userView = new \view\User();
+$userModel = new \model\User();
 
-echo $userView->signInHtml();
+if (!isset($_GET["page"])) {
+  if ($userModel->isSignedIn()) {
+    echo "Signed in";
+  } else {
+    echo $userView->signIn();
+  }
+} else {
+  switch ($_GET["page"]) {
+    case "login":
+      try {
+        $userModel->signIn($userView->getUsername(), $userView->getPassword());
+      } catch (Exception $e) {
+        $userView->setMessage($e->getMessage());
+        echo $userView->signIn();
+      }
+      break;
+
+    case "logout":
+      echo "logout";
+      break;
+  }
+}
 
 $time = new \view\CurrentTime();
 echo $time->html();
