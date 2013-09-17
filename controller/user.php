@@ -15,7 +15,7 @@ class User {
 
   public function startpage() {
     if ($this->model->isLoggedIn()) {
-      echo "Logged in";
+      echo $this->view->member($this->model);
     } else {
       echo $this->view->login();
     }
@@ -24,11 +24,15 @@ class User {
   public function loginUser() {
     try {
       $this->model->login($this->view->getUsername(), $this->view->getPassword());
-      $this->view->setMessage("Inloggning lyckades");
-      echo $this->view->member($this->model);
+      $this->redirectWithMessage("Inloggning lyckades", "/");
     } catch (\Exception $e) {
-      $this->view->setMessage($e->getMessage());
-      echo $this->view->login();
+      $this->redirectWithMessage($e->getMessage(), "/");
     }
+  }
+
+  private function redirectWithMessage($message, $url) {
+    $this->view->setMessage($message);
+    header("Location: $url");
+    exit;
   }
 }

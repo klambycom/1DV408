@@ -3,8 +3,6 @@
 namespace view;
 
 class User {
-  private $message = "";
-
   public function login() {
     $html = "
       <h2>Ej inloggad</h2>
@@ -13,9 +11,7 @@ class User {
           <legend>Login - Skriv in användarnamn och lösenord</legend>
     ";
 
-    if ($this->message != "") {
-      $html .= "<p id='msg'>" . $this->message . "</p>";
-    }
+    $html .= $this->getMessage();
 
     $html .= "
           <label for='username'>Användarnamn</label>
@@ -34,12 +30,8 @@ class User {
 
   public function member(\model\User $user) {
     $html  = "<h2>{$user->getUsername()} är inloggad</h2>";
-    $html .= ($this->message == "") ? "" : "<p id='msg'>$this->message</p>";
+    $html .= $this->getMessage();
     return $html . "<a href='#'>Logga ut</a>";
-  }
-
-  public function setMessage($msg) {
-    $this->message = $msg;
   }
 
   public function getUsername() {
@@ -48,5 +40,18 @@ class User {
 
   public function getPassword() {
     return (isset($_POST["password"])) ? $_POST["password"] : "";
+  }
+
+  private function getMessage() {
+    if (isset($_SESSION["msg"])) {
+      $msg = htmlspecialchars($_SESSION["msg"]);
+      unset($_SESSION["msg"]);
+      return "<p id='msg'>$msg</p>";
+    }
+    return "";
+  }
+
+  public function setMessage($msg) {
+    $_SESSION["msg"] = $msg;
   }
 }
