@@ -19,7 +19,7 @@ class User {
 
     $html .= "
           <label for='username'>Användarnamn</label>
-          <input type='text' size='20' name='username' id='username' text='" . $this->getUsername() . "' />
+          <input type='text' size='20' name='username' id='username' value='" . $this->getUsername() . "' />
           <label for='password'>Lösenord</label>
           <input type='password' name='password' id='password' />
           <label for='autologin'>Håll mig inloggad</label>
