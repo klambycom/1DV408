@@ -32,35 +32,3 @@ class User {
     }
   }
 }
-
-/*
-<?php
-require_once("view/user.php");
-require_once("view/currenttime.php");
-require_once("model/user.php");
-
-$view = new \view\User();
-$model = new \model\User();
-
-if (!isset($_GET["page"])) {
-  if ($model->isLoggedIn()) {
-    echo "Signed in";
-  } else {
-    echo $view->login();
-  }
-} else {
-  switch ($_GET["page"]) {
-    case "login":
-      break;
-
-    case "logout":
-      echo "logout";
-      break;
-  }
-}
-
-$time = new \view\CurrentTime();
-echo $time->html();
-
-?>
- */
