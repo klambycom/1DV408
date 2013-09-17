@@ -6,6 +6,9 @@ class User {
   private static $username = "usernameField";
   private static $password = "passwordField";
 
+  /**
+   * @return Html
+   */
   public function login() {
     $html = "
       <h2>Ej inloggad</h2>
@@ -31,12 +34,19 @@ class User {
     return $html;
   }
 
+  /**
+   * @param \model\User
+   * @return Html
+   */
   public function member(\model\User $user) {
     $html  = "<h2>{$user->getUsername()} är inloggad</h2>";
     $html .= $this->getMessage();
     return $html . "<a href='?page=logout'>Logga ut</a>";
   }
 
+  /**
+   * @return string
+   */
   public function getUsername() {
     if (isset($_SESSION[self::$username]) && !isset($_POST[self::$username])) {
       return $this->unsetSession(self::$username);
@@ -47,14 +57,23 @@ class User {
     return "";
   }
 
+  /**
+   * @return string
+   */
   public function getPassword() {
     return (isset($_POST[self::$password])) ? $_POST[self::$password] : "";
   }
 
+  /**
+   * @param string $msg The message to be displayed
+   */
   public function setMessage($msg) {
     $_SESSION["msg"] = $msg;
   }
 
+  /**
+   * @return string
+   */
   private function getMessage() {
     if (isset($_SESSION["msg"])) {
       return "<p id='msg'>" . htmlspecialchars($this->unsetSession("msg")) . "</p>";
@@ -62,6 +81,10 @@ class User {
     return "";
   }
 
+  /**
+   * @param mixed
+   * @return mixed
+   */
   private function unsetSession($var) {
     $ret = $_SESSION[$var];
     unset($_SESSION[$var]);

@@ -9,6 +9,9 @@ class CurrentTime {
                           "Juli", "Augusti", "September", "Oktober", "November",
                           "December");
 
+  /**
+   * @return string Current time
+   */
   public function html() {
     return "<p>" .$this->days[date("w")] . "dag, den " . date("j") . " " .
            $this->months[date("n")] . " år " . date("Y") . ". Klockan är [" .
