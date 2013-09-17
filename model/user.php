@@ -3,21 +3,25 @@
 namespace model;
 
 class User {
-  private $signedIn = false;
+  private $loggedIn = false;
 
-  public function isSignedIn() {
-    return $this->signedIn;
+  public function isLoggedIn() {
+    return $this->loggedIn;
   }
 
-  public function signIn($username, $password) {
+  public function login($username, $password) {
     $this->validate(array("Användarnamn" => !empty($username),
                           "Lösenord"     => !empty($password)));
 
     if ($username == "Admin" && $password == "Password") {
-      $this->signedIn = true;
+      $this->loggedIn = true;
     } else {
       throw new \Exception("Felaktigt användarnamn och/eller lösenord");
     }
+  }
+
+  public function getUsername() {
+    return "Admin";
   }
 
   private function validate($tests) {

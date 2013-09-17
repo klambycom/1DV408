@@ -1,3 +1,15 @@
+<?php
+require_once("controller/user.php");
+require_once("view/currenttime.php");
+
+$routes = array("start"  => "startpage",
+                "login"  => "loginUser",
+                "logout" => "logoutUser");
+
+$page = isset($_GET["page"]) ? $_GET["page"] : "start";
+
+$controller = new \controller\User();
+?>
 <!doctype html>
 <html lang="sv">
   <head>
@@ -6,42 +18,11 @@
   </head>
   <body>
     <h1>1DV408</h1>
+    <?php
+    echo $controller->$routes[$page]();
 
-<?php
-require_once("view/user.php");
-require_once("view/currenttime.php");
-require_once("model/user.php");
-
-$userView = new \view\User();
-$userModel = new \model\User();
-
-if (!isset($_GET["page"])) {
-  if ($userModel->isSignedIn()) {
-    echo "Signed in";
-  } else {
-    echo $userView->signIn();
-  }
-} else {
-  switch ($_GET["page"]) {
-    case "login":
-      try {
-        $userModel->signIn($userView->getUsername(), $userView->getPassword());
-      } catch (Exception $e) {
-        $userView->setMessage($e->getMessage());
-        echo $userView->signIn();
-      }
-      break;
-
-    case "logout":
-      echo "logout";
-      break;
-  }
-}
-
-$time = new \view\CurrentTime();
-echo $time->html();
-
-?>
-
+    $time = new \view\CurrentTime();
+    echo $time->html();
+    ?>
   </body>
 </html>

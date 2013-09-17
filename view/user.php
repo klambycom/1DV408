@@ -5,7 +5,7 @@ namespace view;
 class User {
   private $message = "";
 
-  public function signIn() {
+  public function login() {
     $html = "
       <h2>Ej inloggad</h2>
       <form action='?page=login' method='post'>
@@ -32,6 +32,12 @@ class User {
     return $html;
   }
 
+  public function member(\model\User $user) {
+    $html  = "<h2>{$user->getUsername()} är inloggad</h2>";
+    $html .= ($this->message == "") ? "" : "<p id='msg'>$this->message</p>";
+    return $html . "<a href='#'>Logga ut</a>";
+  }
+
   public function setMessage($msg) {
     $this->message = $msg;
   }
@@ -41,6 +47,6 @@ class User {
   }
 
   public function getPassword() {
-    return $_POST["password"];
+    return (isset($_POST["password"])) ? $_POST["password"] : "";
   }
 }
