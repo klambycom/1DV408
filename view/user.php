@@ -3,6 +3,9 @@
 namespace view;
 
 class User {
+  private static $username = "usernameField";
+  private static $password = "passwordField";
+
   public function login() {
     $html = "
       <h2>Ej inloggad</h2>
@@ -14,10 +17,10 @@ class User {
     $html .= $this->getMessage();
 
     $html .= "
-          <label for='username'>Användarnamn</label>
-          <input type='text' size='20' name='username' id='username' value='" . $this->getUsername() . "' />
-          <label for='password'>Lösenord</label>
-          <input type='password' name='password' id='password' />
+          <label for='" . self::$username . "'>Användarnamn</label>
+          <input type='text' size='20' name='" . self::$username . "' id='" . self::$username . "' value='" . $this->getUsername() . "' />
+          <label for='" . self::$password . "'>Lösenord</label>
+          <input type='password' name='" . self::$password . "' id='" . self::$password . "' />
           <label for='autologin'>Håll mig inloggad</label>
           <input type='checkbox' name='autologin' id='autologin' />
           <input type='submit' value='Logga in &rarr;' />
@@ -31,27 +34,37 @@ class User {
   public function member(\model\User $user) {
     $html  = "<h2>{$user->getUsername()} är inloggad</h2>";
     $html .= $this->getMessage();
-    return $html . "<a href='#'>Logga ut</a>";
+    return $html . "<a href='?page=logout'>Logga ut</a>";
   }
 
   public function getUsername() {
-    return (isset($_POST["username"])) ? $_POST["username"] : "";
-  }
-
-  public function getPassword() {
-    return (isset($_POST["password"])) ? $_POST["password"] : "";
-  }
-
-  private function getMessage() {
-    if (isset($_SESSION["msg"])) {
-      $msg = htmlspecialchars($_SESSION["msg"]);
-      unset($_SESSION["msg"]);
-      return "<p id='msg'>$msg</p>";
+    if (isset($_SESSION[self::$username]) && !isset($_POST[self::$username])) {
+      return $this->unsetSession(self::$username);
+    } else if (isset($_POST[self::$username])) {
+      $_SESSION[self::$username] = $_POST[self::$username];
+      return $_POST[self::$username];
     }
     return "";
   }
 
+  public function getPassword() {
+    return (isset($_POST[self::$password])) ? $_POST[self::$password] : "";
+  }
+
   public function setMessage($msg) {
     $_SESSION["msg"] = $msg;
+  }
+
+  private function getMessage() {
+    if (isset($_SESSION["msg"])) {
+      return "<p id='msg'>" . htmlspecialchars($this->unsetSession("msg")) . "</p>";
+    }
+    return "";
+  }
+
+  private function unsetSession($var) {
+    $ret = $_SESSION[$var];
+    unset($_SESSION[$var]);
+    return $ret;
   }
 }
