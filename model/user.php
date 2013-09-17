@@ -3,10 +3,9 @@
 namespace model;
 
 class User {
-  private $loggedIn = false;
-
   public function isLoggedIn() {
-    return $this->loggedIn;
+    return ((isset($_SESSION["username"]) && isset($_SESSION["password"])) &&
+            ($_SESSION["username"] == "Admin" && $_SESSION["password"] == "Password"));
   }
 
   public function login($username, $password) {
@@ -14,14 +13,20 @@ class User {
                           "Lösenord"     => !empty($password)));
 
     if ($username == "Admin" && $password == "Password") {
-      $this->loggedIn = true;
+      $_SESSION["username"] = $username;
+      $_SESSION["password"] = $password;
     } else {
       throw new \Exception("Felaktigt användarnamn och/eller lösenord");
     }
   }
 
+  public function logout() {
+    unset($_SESSION["username"]);
+    unset($_SESSION["password"]);
+  }
+
   public function getUsername() {
-    return "Admin";
+    return isset($_SESSION["username"]) ? $_SESSION["username"] : "";
   }
 
   private function validate($tests) {
