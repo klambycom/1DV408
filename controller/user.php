@@ -24,13 +24,18 @@ class User {
   public function loginUser() {
     try {
       $this->model->login($this->view->getUsername(), $this->view->getPassword());
-      $this->redirectWithMessage("Inloggning lyckades", "/");
+      $this->redirectWithMessage("/", "Inloggning lyckades");
     } catch (\Exception $e) {
-      $this->redirectWithMessage($e->getMessage(), "/");
+      $this->redirectWithMessage("/", $e->getMessage());
     }
   }
 
-  private function redirectWithMessage($message, $url) {
+  public function logoutUser() {
+    $this->model->logout();
+    $this->redirectWithMessage("/", "Du har nu loggat ut");
+  }
+
+  private function redirectWithMessage($url, $message) {
     $this->view->setMessage($message);
     header("Location: $url");
     exit;
