@@ -26,5 +26,3 @@ Puppetmoduler som måste installeras:
 
 Jag har en absolut sökväg på min dator i `puppet.module_path`, så det måste
 ändras. (Det borde finnas en smartare lösning.)
-
-test
