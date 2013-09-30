@@ -3,35 +3,38 @@
 namespace view;
 
 class User {
-  private static $username = "usernameField";
-  private static $password = "passwordField";
+  /**
+   * @var string $username Name of the username field.
+   */
+  private static $username = "view::user::username";
+
+  /**
+   * @var string $password Name of the password field.
+   */
+  private static $password = "view::user::password";
 
   /**
    * @return Html
    */
   public function login() {
-    $html = "
+    return "
       <h2>Ej inloggad</h2>
       <form action='?page=login' method='post'>
         <fieldset>
           <legend>Login - Skriv in användarnamn och lösenord</legend>
-    ";
-
-    $html .= $this->getMessage();
-
-    $html .= "
+          {$this->getMessage()}
           <label for='" . self::$username . "'>Användarnamn</label>
-          <input type='text' size='20' name='" . self::$username . "' id='" . self::$username . "' value='" . $this->getUsername() . "' />
+          <input type='text' name='" . self::$username . "'
+                 id='" . self::$username . "' value='{$this->getUsername()}' />
           <label for='" . self::$password . "'>Lösenord</label>
-          <input type='password' name='" . self::$password . "' id='" . self::$password . "' />
+          <input type='password' name='" . self::$password . "'
+                 id='" . self::$password . "' />
           <label for='autologin'>Håll mig inloggad</label>
           <input type='checkbox' name='autologin' id='autologin' />
           <input type='submit' value='Logga in &rarr;' />
         </fieldset>
       </form>
     ";
-
-    return $html;
   }
 
   /**
@@ -39,9 +42,9 @@ class User {
    * @return Html
    */
   public function member(\model\User $user) {
-    $html  = "<h2>{$user->getUsername()} är inloggad</h2>";
-    $html .= $this->getMessage();
-    return $html . "<a href='?page=logout'>Logga ut</a>";
+    return "<h2>{$user->getUsername()} är inloggad</h2>
+            {$this->getMessage()}
+            <a href='?page=logout'>Logga ut</a>";
   }
 
   /**
@@ -72,22 +75,23 @@ class User {
   }
 
   /**
-   * @return string
+   * @return string Message if there is any.
    */
   private function getMessage() {
     if (isset($_SESSION["msg"])) {
-      return "<p id='msg'>" . htmlspecialchars($this->unsetSession("msg")) . "</p>";
+      return sprintf("<p id='msg'>%s</p>",
+                     htmlspecialchars($this->unsetSession("msg")));
     }
     return "";
   }
 
   /**
-   * @param mixed
-   * @return mixed
+   * @param mixed $sessionName Name of the session.
+   * @return mixed The value from the session.
    */
-  private function unsetSession($var) {
-    $ret = $_SESSION[$var];
-    unset($_SESSION[$var]);
+  private function unsetSession($sessionName) {
+    $ret = $_SESSION[$sessionName];
+    unset($_SESSION[$sessionName]);
     return $ret;
   }
 }
