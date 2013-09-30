@@ -26,6 +26,11 @@ package { "php5-xdebug":
   require => Class["apache::mod::php"],
 }
 
+package { "php5-mcrypt":
+  ensure  => installed,
+  require => Class["apache::mod::php"],
+}
+
 file { 'php-config':
   path    => '/etc/php5/apache2/php.ini',
   source  => '/vagrant/php.ini',
