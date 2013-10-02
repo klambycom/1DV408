@@ -26,8 +26,20 @@ class User {
   public function startpage() {
     if ($this->model->isLoggedIn()) {
       echo $this->view->member($this->model);
+    } else if ($this->model->isSavedInCookie()) {
+      $this->loginUsingCookie();
     } else {
       echo $this->view->login();
+    }
+  }
+
+  private function loginUsingCookie() {
+    try {
+      $this->model->loginUsingCookie();
+      $this->redirectWithMessage("/", "Inloggning lyckades via cookies.");
+    } catch (\Exception $e) {
+      $this->model->logout();
+      $this->redirectWithMessage("/", $e->getMessage());
     }
   }
 
@@ -37,8 +49,14 @@ class User {
   public function loginUser() {
     try {
       $this->model->login($this->view->getUsername(),
-                          $this->view->getPassword());
-      $this->redirectWithMessage("/", "Inloggning lyckades");
+                          $this->view->getPassword(),
+                          $this->view->isRememberMeChecked());
+
+      if ($this->view->isRememberMeChecked()) {
+        $msg = "och vi kommer ihåg dig nästa gång.";
+      }
+
+      $this->redirectWithMessage("/", "Inloggning lyckades $msg");
     } catch (\Exception $e) {
       $this->redirectWithMessage("/", $e->getMessage());
     }

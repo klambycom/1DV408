@@ -14,6 +14,11 @@ class User {
   private static $password = "view::user::password";
 
   /**
+   * @var string $rememberMe Name of the remember me field.
+   */
+  private static $rememberMe = "view::user::rememberMe";
+
+  /**
    * @return Html
    */
   public function login() {
@@ -29,8 +34,9 @@ class User {
           <label for='" . self::$password . "'>Lösenord</label>
           <input type='password' name='" . self::$password . "'
                  id='" . self::$password . "' />
-          <label for='autologin'>Håll mig inloggad</label>
-          <input type='checkbox' name='autologin' id='autologin' />
+          <label for='" . self::$rememberMe . "'>Håll mig inloggad</label>
+          <input type='checkbox' name='" . self::$rememberMe . "'
+                 id='" . self::$rememberMe . "' />
           <input type='submit' value='Logga in &rarr;' />
         </fieldset>
       </form>
@@ -65,6 +71,10 @@ class User {
    */
   public function getPassword() {
     return (isset($_POST[self::$password])) ? $_POST[self::$password] : "";
+  }
+
+  public function isRememberMeChecked() {
+    return isset($_POST[self::$rememberMe]);
   }
 
   /**
