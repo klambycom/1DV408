@@ -35,7 +35,7 @@ class User {
   public function login() {
     return "
       <h2>Ej inloggad</h2>
-      <form action='' method='post'>
+      <form action='/?page=login' method='post'>
         <fieldset>
           <legend>Login - Skriv in användarnamn och lösenord</legend>
           {$this->getMessage()}
@@ -99,16 +99,17 @@ class User {
   }
 
   /**
-   * @param string $msg The message to be displayed
+   * @param string $msg The message to be displayed without being saved in 
+   *                    session
    */
-  public function setMessage($msg) {
+  public function setMessageDirect($msg) {
     $this->message = $msg;
   }
 
   /**
    * @param string $msg The message to be saved and displayed
    */
-  public function saveMessage($msg) {
+  public function setMessage($msg) {
     $_SESSION["msg"] = $msg;
   }
 

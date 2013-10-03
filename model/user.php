@@ -70,9 +70,9 @@ class User {
   /**
    * @return string Encrypted string with user information
    */
-  public function getEncryptedId() {
+  public function getEncryptedId($time) {
     $json = sprintf('{ "time": %d, "username": "%s", "password": "%s" }',
-                    time() + 3600 * 24 * 7,
+                    $time,
                     $this->getUsername(),
                     $this->getPassword());
     return $this->encryption->encrypt($json);

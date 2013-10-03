@@ -34,7 +34,8 @@ class Persistence {
    * @return Boolean Return if trying to login using session
    */
   public function isUsingSession() {
-    return isset($_SESSION[self::$username]) && isset($_SESSION[self::$password]) &&
+    return isset($_SESSION[self::$username]) &&
+           isset($_SESSION[self::$password]) &&
            $_SESSION[self::$agent] == $_SERVER["HTTP_USER_AGENT"];
   }
 
@@ -55,8 +56,8 @@ class Persistence {
   /**
    * @param string Encrypted string with user information
    */
-  public function setEncryptedId($id) {
-    setcookie(self::$cookie, $id, time() + 3600 * 24 * 7);
+  public function setEncryptedId($id, $time) {
+    setcookie(self::$cookie, $id, $time);
   }
 
   /**
@@ -64,6 +65,14 @@ class Persistence {
    */
   public function removeCookie() {
     setcookie(self::$cookie, "", time() - 100);
+  }
+
+  /**
+   * Remove cookie and session
+   */
+  public function destroy() {
+    $this->removeCookie();
+    $this->destroySession();
   }
 
   /**
