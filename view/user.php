@@ -19,12 +19,23 @@ class User {
   private static $rememberMe = "view::user::rememberMe";
 
   /**
+   * @var string $message
+   */
+  private $message;
+
+  public function __construct() {
+    if (isset($_SESSION["msg"])) {
+      $this->message = $this->unsetSession("msg");
+    }
+  }
+
+  /**
    * @return Html
    */
   public function login() {
     return "
       <h2>Ej inloggad</h2>
-      <form action='?page=login' method='post'>
+      <form action='' method='post'>
         <fieldset>
           <legend>Login - Skriv in användarnamn och lösenord</legend>
           {$this->getMessage()}
@@ -73,14 +84,31 @@ class User {
     return (isset($_POST[self::$password])) ? $_POST[self::$password] : "";
   }
 
+  /**
+   * @return boolean Return true if remember me is checked
+   */
   public function isRememberMeChecked() {
     return isset($_POST[self::$rememberMe]);
+  }
+
+  /**
+   * @return boolean Return true if user is trying to login
+   */
+  public function isLoggingIn() {
+    return $_SERVER['REQUEST_METHOD'] == 'POST';
   }
 
   /**
    * @param string $msg The message to be displayed
    */
   public function setMessage($msg) {
+    $this->message = $msg;
+  }
+
+  /**
+   * @param string $msg The message to be saved and displayed
+   */
+  public function saveMessage($msg) {
     $_SESSION["msg"] = $msg;
   }
 
@@ -88,9 +116,8 @@ class User {
    * @return string Message if there is any.
    */
   private function getMessage() {
-    if (isset($_SESSION["msg"])) {
-      return sprintf("<p id='msg'>%s</p>",
-                     htmlspecialchars($this->unsetSession("msg")));
+    if (!empty($this->message)) {
+      return sprintf("<p id='msg'>%s</p>", htmlspecialchars($this->message));
     }
     return "";
   }

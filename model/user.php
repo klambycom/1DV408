@@ -4,49 +4,23 @@ namespace model;
 require_once("model/encryption.php");
 
 class User {
+  /**
+   * @var \model\Encryption
+   */
   private $encryption;
 
   /**
-   * @var string $usernameName Name of the username session and cookie.
+   * @var string $username
    */
-  private static $usernameName = "model::user::username";
+  private $username;
 
   /**
-   * @var string $passwordName Name of the password session and cookie.
+   * @var string $password
    */
-  private static $passwordName = "model::user::password";
-
-  private static $useragentName = "model::user::useragent";
+  private $password;
 
   public function __construct() {
     $this->encryption = new Encryption("A secret string i should change");
-  }
-
-  /**
-   * @return boolean Return true if user is authenticated
-   */
-  public function isLoggedIn() {
-    return (isset($_SESSION[self::$usernameName]) &&
-            isset($_SESSION[self::$passwordName]) &&
-            isset($_SESSION[self::$useragentName])) &&
-           $_SESSION[self::$useragentName] == $_SERVER["HTTP_USER_AGENT"] &&
-           $this->checkUser($_SESSION[self::$usernameName],
-                            $_SESSION[self::$passwordName]);
-  }
-
-  public function loginUsingCookie() {
-    $password = $this->decryptPassword($_COOKIE[self::$passwordName]);
-
-    if ($this->checkUser($_COOKIE[self::$usernameName], $password)) {
-      $this->saveSession($_COOKIE[self::$usernameName], $password);
-    } else {
-      throw new \Exception("Felaktig information i cookie");
-    }
-  }
-
-  public function isSavedInCookie() {
-    return (isset($_COOKIE[self::$usernameName]) &&
-            isset($_COOKIE[self::$passwordName]));
   }
 
   /**
@@ -55,72 +29,75 @@ class User {
    *
    * @throws Exception if wrong username or password is passed to the function.
    */
-  public function login($username, $password, $rememberMe = false) {
+  public function login($username, $password) {
     $this->validate(array("Användarnamn" => !empty($username),
                           "Lösenord"     => !empty($password)));
 
     if ($this->checkUser($username, $password)) {
-      $this->saveSession($username, $password);
-      if ($rememberMe) $this->saveCookie($username, $password);
+      $this->username = $username;
+      $this->password = $password;
     } else {
       throw new \Exception("Felaktigt användarnamn och/eller lösenord");
     }
+
+    return true;
   }
 
   /**
-   * Unset all sessions
+   * @param string $id
+   *
+   * @throws Exception if id is wrong.
    */
-  public function logout() {
-    unset($_SESSION[self::$usernameName]);
-    unset($_SESSION[self::$passwordName]);
-    setcookie(self::$usernameName, "", time() - 3600);
-    setcookie(self::$passwordName, "", time() - 3600);
+  public function loginWithId($id) {
+    $user = $this->getDecryptedId($id);
+    $this->login($user->{"username"}, $user->{"password"});
   }
 
   /**
-   * @return string
+   * @return string The username
    */
   public function getUsername() {
-    return isset($_SESSION[self::$usernameName]) ?
-           $_SESSION[self::$usernameName] : "";
+    return $this->username;
   }
 
   /**
-   * @param string $username
-   * @param string $password
+   * @return string The password
    */
-  private function saveSession($username, $password) {
-    $_SESSION[self::$usernameName] = $username;
-    $_SESSION[self::$passwordName] = $password;
-    $_SESSION[self::$useragentName] = $_SERVER["HTTP_USER_AGENT"];
+  public function getPassword() {
+    return $this->password;
   }
 
   /**
-   * @param string $username
-   * @param string $password
+   * @return string Encrypted string with user information
    */
-  private function saveCookie($username, $password) {
-    $expiration = time() + 3600 * 24 * 7;
-    $encrypted = $this->encryptPassword($password, $expiration);
-
-    setcookie(self::$usernameName, $username, $expiration);
-    setcookie(self::$passwordName, $encrypted, $expiration);
-  }
-
-  private function encryptPassword($password, $date) {
-    $json = sprintf('{ "time": %d, "password": "%s"}', $date, $password);
+  public function getEncryptedId() {
+    $json = sprintf('{ "time": %d, "username": "%s", "password": "%s" }',
+                    time() + 3600 * 24 * 7,
+                    $this->getUsername(),
+                    $this->getPassword());
     return $this->encryption->encrypt($json);
   }
 
-  private function decryptPassword($password) {
-    $json = json_decode($this->encryption->decrypt($password));
+  /**
+   * @return json User information in Json format
+   */
+  private function getDecryptedId($id) {
+    $json = json_decode($this->encryption->decrypt($id));
+
+    if (!isset($json))
+      throw new \Exception("Felaktig information i cookie.");
 
     if ($json->{"time"} < time())
-      throw new \Exception("Felaktig information i cookie");
+      throw new \Exception("Krypteringen är för gammal.");
 
-    return $json->{"password"};
+    return $json;
   }
 
+  /**
+   * @param string $username
+   * @param string $password
+   * @return boolean Return true if username and password is correct
+   */
   private function checkUser($username, $password) {
     return $username == "Admin" && $password == "Password";
   }

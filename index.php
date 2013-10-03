@@ -4,9 +4,9 @@ session_start();
 require_once("controller/user.php");
 require_once("view/currenttime.php");
 
-$routes = array("start"  => "startpage",
-                "login"  => "loginUser",
-                "logout" => "logoutUser");
+$routes = array("start"  => "doStartpage",
+                "login"  => "doLogin",
+                "logout" => "doLogout");
 
 $page = isset($_GET["page"]) ? $_GET["page"] : "start";
 

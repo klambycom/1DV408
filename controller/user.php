@@ -2,6 +2,7 @@
 namespace controller;
 
 require_once("view/user.php");
+require_once("view/persistence.php");
 require_once("model/user.php");
 
 class User {
@@ -15,68 +16,104 @@ class User {
    */
   private $model;
 
+  /**
+   * @var \model\Persistence $persistence Handles cookies and sessions.
+   */
+  private $persistence;
+
+  /**
+   * Make instances of View, Model and Persistence.
+   */
   public function __construct() {
     $this->view = new \view\User();
     $this->model = new \model\User();
+    $this->persistence = new \view\Persistence();
+  }
+
+  /**
+   * Logout user and redirect to frontpage.
+   */
+  public function doLogout() {
+    $this->persistence->removeCookie();
+    $this->persistence->destroySession();
+    $this->view->saveMessage("Du har nu loggat ut");
+    header("Location: /");
+    exit;
   }
 
   /**
    * Show login form if not logged in, else member area.
    */
-  public function startpage() {
-    if ($this->model->isLoggedIn()) {
-      echo $this->view->member($this->model);
-    } else if ($this->model->isSavedInCookie()) {
-      $this->loginUsingCookie();
+  public function doStartpage() {
+    if ($this->persistence->isInUse() || $this->view->isLoggingIn()) {
+      if ($this->login()) {
+        echo $this->view->member($this->model);
+      } else {
+        echo $this->view->login();
+      }
     } else {
       echo $this->view->login();
-    }
-  }
-
-  private function loginUsingCookie() {
-    try {
-      $this->model->loginUsingCookie();
-      $this->redirectWithMessage("/", "Inloggning lyckades via cookies.");
-    } catch (\Exception $e) {
-      $this->model->logout();
-      $this->redirectWithMessage("/", $e->getMessage());
     }
   }
 
   /**
    * Login user or show error message, and redirect to frontpage.
    */
-  public function loginUser() {
+  private function login() {
     try {
-      $this->model->login($this->view->getUsername(),
-                          $this->view->getPassword(),
-                          $this->view->isRememberMeChecked());
-
-      if ($this->view->isRememberMeChecked()) {
-        $msg = "och vi kommer ihåg dig nästa gång.";
+      if ($this->persistence->isUsingSession()) {
+        $this->loginWithSession();
+      } else if ($this->persistence->isUsingCookie()) {
+        $this->loginWithCookie();
+      } else if ($this->view->isLoggingIn()) {
+        $this->loginWithPost();
+      } else {
+        return false;
       }
 
-      $this->redirectWithMessage("/", "Inloggning lyckades $msg");
+      $this->persistence->saveSession($this->model->getUsername(),
+                                      $this->model->getPassword());
+
+      return true;
     } catch (\Exception $e) {
-      $this->redirectWithMessage("/", $e->getMessage());
+      $this->view->setMessage($e->getMessage());
     }
   }
 
   /**
-   * Logout user and redirect to frontpage.
+   * Login with $_POST
    */
-  public function logoutUser() {
-    $this->model->logout();
-    $this->redirectWithMessage("/", "Du har nu loggat ut");
+  private function loginWithPost() {
+    $this->model->login($this->view->getUsername(),
+                        $this->view->getPassword());
+
+    if ($this->view->isRememberMeChecked()) {
+      $this->persistence->setEncryptedId($this->model->getEncryptedId());
+      $this->view->setMessage("Inloggning lyckades och vi kommer ihåg dig nästa gång.");
+    } else {
+      $this->view->setMessage("Inloggning lyckades.");
+    }
   }
 
   /**
-   * @param string $url
-   * @param string $message
+   * Login with $_COOKIE
+   * @throws Exception if information is incorrect
    */
-  private function redirectWithMessage($url, $message) {
-    $this->view->setMessage($message);
-    header("Location: $url");
-    exit;
+  private function loginWithCookie() {
+    try {
+      $this->model->loginWithId($this->persistence->getEncryptedId());
+      $this->view->setMessage("Inloggning lyckades via cookie.");
+    } catch (\Exception $e) {
+      $this->persistence->removeCookie();
+      throw new \Exception("Felaktig information i cookie");
+    }
+  }
+
+  /**
+   * Login with $_SESSION
+   */
+  private function loginWithSession() {
+    $this->model->login($this->persistence->getUsername(),
+                        $this->persistence->getPassword());
   }
 }
