@@ -18,7 +18,7 @@ include "apache::mod::php"
 
 apache::vhost { "lab-site":
   port    => 80,
-  docroot => "/vagrant",
+  docroot => "/vagrant/src",
 }
 
 package { "php5-xdebug":
