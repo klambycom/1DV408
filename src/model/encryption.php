@@ -27,7 +27,7 @@ class Encryption {
    * @param string $value
    * @return A encrypted string.
    */
-  public function encrypt($value) {
+  public function makeEncryption($value) {
     $text = $this->mcrypt("encrypt", $value);
     return trim(base64_encode($text));
   }
@@ -36,7 +36,7 @@ class Encryption {
    * @param string $value
    * @return A decrypted string.
    */
-  public function decrypt($value) {
+  public function makeDecryption($value) {
     $text = $this->mcrypt("decrypt", base64_decode($value));
     return trim($text);
   }

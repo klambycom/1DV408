@@ -102,7 +102,7 @@ class User {
 
     if ($this->view->isRememberMeChecked()) {
       $time = time() + 3600 * 24 * 7;
-      $this->persistence->setEncryptedId($this->model->getEncryptedId($time),
+      $this->persistence->setEncryptedId($this->model->getEncryption($time),
                                          $time);
       $msg = "Inloggning lyckades och vi kommer ihåg dig nästa gång.";
     }
@@ -116,7 +116,7 @@ class User {
    */
   private function loginUsingCookie() {
     try {
-      $this->model->loginWithId($this->persistence->getEncryptedId());
+      $this->model->loginUsingEncryption($this->persistence->getEncryptedId());
     } catch (\Exception $e) {
       $this->persistence->removeCookie();
       throw new \Exception("Felaktig information i cookie");

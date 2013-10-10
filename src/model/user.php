@@ -1,14 +1,9 @@
 <?php
 namespace model;
 
-require_once("model/encryption.php");
+require_once("model/userencryption.php");
 
 class User {
-  /**
-   * @var \model\Encryption
-   */
-  private $encryption;
-
   /**
    * @var string $username
    */
@@ -18,10 +13,6 @@ class User {
    * @var string $password
    */
   private $password;
-
-  public function __construct() {
-    $this->encryption = new Encryption("A secret string i should change");
-  }
 
   /**
    * @param string $username
@@ -44,16 +35,6 @@ class User {
   }
 
   /**
-   * @param string $id
-   *
-   * @throws Exception if id is wrong.
-   */
-  public function loginWithId($id) {
-    $user = $this->getDecryptedId($id);
-    $this->login($user->{"username"}, $user->{"password"});
-  }
-
-  /**
    * @return string The username
    */
   public function getUsername() {
@@ -68,29 +49,23 @@ class User {
   }
 
   /**
-   * @return string Encrypted string with user information
+   * @param string $id
+   *
+   * @throws Exception if id is wrong.
    */
-  public function getEncryptedId($time) {
-    $json = sprintf('{ "time": %d, "username": "%s", "password": "%s" }',
-                    $time,
-                    $this->getUsername(),
-                    $this->getPassword());
-    return $this->encryption->encrypt($json);
+  public function loginUsingEncryption($id) {
+    $encryption = UserEncryption::decrypt($id);
+    $this->login($encryption->getUsername(), $encryption->getPassword());
   }
 
   /**
-   * @return json User information in Json format
+   * @return string Encrypted string with user information
    */
-  private function getDecryptedId($id) {
-    $json = json_decode($this->encryption->decrypt($id));
-
-    if (!isset($json))
-      throw new \Exception("Felaktig information i cookie.");
-
-    if ($json->{"time"} < time())
-      throw new \Exception("Krypteringen är för gammal.");
-
-    return $json;
+  public function getEncryption($time) {
+    $encryption = UserEncryption::encrypt($this->getUsername(),
+                                          $this->getPassword(),
+                                          $time);
+    return $encryption->getEncryption();
   }
 
   /**
