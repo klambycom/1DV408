@@ -34,7 +34,9 @@ class User {
    * Logout user and redirect to frontpage.
    */
   public function doLogout() {
-    $this->persistence->destroy();
+    $this->persistence->removeCookie();
+    $user = new \model\User();
+    $user->destroySession();
     $this->redirect("/", "Du har nu loggat ut");
   }
 
@@ -42,7 +44,7 @@ class User {
    * Show login form if not logged in, else member area.
    */
   public function doStartpage() {
-    if ($this->persistence->isInUse()) {
+    if ($this->persistence->isUsingCookie() || \model\User::session()) {
       $this->loginUsingPersistence();
     } else {
       echo $this->view->login();
@@ -53,7 +55,7 @@ class User {
    * Login using $_SESSION or $_COOKIE
    */
   private function loginUsingPersistence() {
-      if ($this->persistence->isUsingSession()) {
+      if (\model\User::session()) {
         $this->login("session");
       } else {
         $this->login("cookie");
@@ -78,14 +80,9 @@ class User {
   private function login($method) {
     try {
       $temp = 'loginUsing' . ucfirst($method);
-      $message = $this->$temp();
-
-      $this->persistence->saveSession($this->model->getUsername(),
-                                      $this->model->getPassword());
-
-      return $message;
+      return $this->$temp();
     } catch (\Exception $e) {
-      $this->persistence->destroy();
+      $this->persistence->removeCookie();
       $this->redirect("/", $e->getMessage());
     }
   }
@@ -127,8 +124,7 @@ class User {
    * Login using $_SESSION
    */
   private function loginUsingSession() {
-    $this->model->login($this->persistence->getUsername(),
-                        $this->persistence->getPassword());
+    $this->model->login();
   }
 
   /**
